@@ -1,27 +1,24 @@
-const { ethers } = require('hardhat');
-const fs = require('fs');
+import { ethers } from "hardhat";
+const hre = require("hardhat");
 
 async function main() {
-  const [deployer] = await ethers.getSigners();
+  const [Deployer] = await hre.ethers.getSigners(); 
 
-  console.log('Deploying contracts with the account:', deployer.address);
+  console.log("ContractManagement deployed to:", Deployer.address);
 
-  const ContractManagement = await ethers.getContractFactory('ContractManagement');
-  const contractManagement = await ContractManagement.deploy(2); // Number of required approvals
+  const ContractManagement = await ethers.getContractFactory("ContractManagement");
+  const contractManagement = await ContractManagement.deploy();
+  await contractManagement.waitForDeployment();
+  console.log("ContractManagement deployed to:", (contractManagement as any).address);
+  // Store the contract addresses for later use  // Store the contract addresses for later use
+  const addresses = {
+    ContractManagement: contractManagement,
+  };
 
-  await contractManagement.deployed();
-
-  console.log('CrossOrgWorkflow deployed to:', contractManagement.address);
-
-  // Save contract address to a file for later use
-  const contractAddress = contractManagement.address;
-  fs.writeFileSync('contract-address.txt', contractAddress);
-
-  // Add organizations
-  await contractManagement.addOrganization('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266');
-  await contractManagement.addOrganization('0x70997970c51812dc3a010c7d01b50e0d17dc79c8');
-
-  console.log('Organizations added.');
+  // Store the contract addresses in a JSON file for easy access
+  const fs = require("fs");
+  fs.writeFileSync("deployedAddresses.json", JSON.stringify(addresses, null, 2));
+  console.log("Contract addresses written to deployedAddresses.json");
 }
 
 main()
